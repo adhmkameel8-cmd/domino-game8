@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>دومينو آرت - دومينو حديثة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0f1e, #03050b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Cairo', sans-serif;
+            padding: 20px;
+        }
+
+        /* glassmorphic main container */
+        .game-container {
+            background: rgba(15, 25, 45, 0.55);
+            backdrop-filter: blur(12px);
+            border-radius: 4rem 2rem 4rem 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1);
+            border: 1px solid rgba(80, 180, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        /* header with glow */
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #FFF8E7, #9cd4ff, #50b0ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px #3e6eff55;
+            letter-spacing: 2px;
+        }
+
+        .glow-text {
+            font-size: 1.1rem;
+            color: #bbd9ff;
+            text-shadow: 0 0 5px #00a6ff;
+        }
+
+        /* لوحة النقاط والمعلومات */
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 60px;
+            padding: 10px 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(72, 187, 255, 0.4);
+            box-shadow: 0 0 12px rgba(0,160,255,0.2);
+        }
+
+        .score-box, .turn-box {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #eef5ff;
+        }
+
+        .score-box span, .turn-box span {
+            color: #ffd966;
+            font-size: 1.6rem;
+            margin-left: 8px;
+            text-shadow: 0 0 8px #ffae00;
+        }
+
+        /* لوحة الدومينو الخاصة باللاعب */
+        .hand-area {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 40px;
+            padding: 20px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            transition: 0.2s;
+        }
+
+        .hand-title {
+            color: #9fc8ff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tiles {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        /* تصميم الدومينو (قطعة) */
+        .domino-tile {
+            background: #fef7e0;
+            width: 80px;
+            height: 110px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            font-family: monospace;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 10px 0 #8b6b42;
+            border: 2px solid #ffcd94;
+            position: relative;
+        }
+
+        .domino-tile:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 20px rgba(0, 160, 255, 0.4);
+            background: #fff5e6;
+            border-color: #ffaa44;
+        }
+
+        .domino-tile.disabled-tile {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            filter: grayscale(0.2);
+        }
+
+        .domino-value {
+            background: #2c2e3a;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 1rem;
+            margin-top: 6px;
+        }
+
+        .domino-dots {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.9rem;
+        }
+
+        /* منتصف اللعبة: الطاولة (سلسلة الدومينو) */
+        .board-area {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 48px;
+            padding: 20px;
+            margin-bottom: 25px;
+            min-height: 150px;
+            border: 1px dashed #3a86ff;
+            transition: all 0.2s;
+        }
+
+        .chain {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chain-tile {
+            background: #fff0d0;
+            width: 70px;
+            height: 95px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            box-shadow: 0 5px 0 #a5723a;
+            border: 1px solid #ffc285;
+        }
+
+        .reset-btn {
+            background: linear-gradient(95deg, #1f2a48, #0e1a2f);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            box-shadow: 0 0 12px #00a6ff40;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(95deg, #2f4270, #14233e);
+            transform: scale(0.97);
+            box-shadow: 0 0 20px #3e9eff;
+        }
+
+        .winner-message {
+            text-align: center;
+            font-size: 1.7rem;
+            margin-top: 18px;
+            font-weight: bold;
+            background: #000000aa;
+            backdrop-filter: blur(12px);
+            border-radius: 60px;
+            padding: 10px;
+            color: gold;
+            text-shadow: 0 0 15px orange;
+        }
+
+        @keyframes pulseWin {
+            0% { text-shadow: 0 0 0px gold; transform: scale(1);}
+            100% { text-shadow: 0 0 25px rgb(255, 215, 0); transform: scale(1.02);}
+        }
+
+        .win-animate {
+            animation: pulseWin 0.5s ease-in-out 3;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 20px;
+            color: #6c8db0;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-header">
+        <h1>🎲 دومينو آرك 🎲</h1>
+        <div class="glow-text">إضاءات | حركات | صوت الفوز</div>
+    </div>
+
+    <div class="info-panel">
+        <div class="score-box">⭐ نقاطك: <span id="playerScore">0</span></div>
+        <div class="turn-box">🎴 دور: <span id="turnIndicator">أنت</span></div>
+    </div>
+
+    <div class="board-area">
+        <div style="color:#bbdbff; margin-bottom: 8px;">⚡ الطاولة (السلسلة) ⚡</div>
+        <div id="chainContainer" class="chain"></div>
+    </div>
+
+    <div class="hand-area">
+        <div class="hand-title">🎲 يدك 🎲 <span style="font-size:12px;">(اضغط على قطعة للعب)</span></div>
+        <div id="playerHand" class="tiles"></div>
+    </div>
+
+    <button id="resetGame" class="reset-btn">⟳ بداية جديدة ⟳</button>
+    <div id="winnerMessage" class="winner-message"></div>
+    <footer>✨ إضاءات متحركة - دومينو حديثة - صوت الفوز ✨</footer>
+</div>
+
+<script>
+    // ------------------- إعداد الصوت باستخدام Web Audio (نغمة فوز) ------------------
+    function playWinSound() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(523.25, now + 0.3);
+            osc.start();
+            osc.stop(now + 1);
+            audioCtx.resume();
+        } catch(e) { console.log("صوت غير مدعوم"); }
+    }
+
+    // ------------------- المنطق الرئيسي للعبة دومينو (بسيطة) -------------------
+    // سننشئ مجموعة دومينو من 0 إلى 6 (28 قطعة)
+    function generateAllDominos() {
+        let tiles = [];
+        for (let i = 0; i <= 6; i++) {
+            for (let j = i; j <= 6; j++) {
+                tiles.push([i, j]);
+            }
+        }
+        return tiles;
+    }
+
+    let allTiles = generateAllDominos(); // 28 قطعة
+    let playerHand = [];      // يد اللاعب (array من الأزواج)
+    let computerHand = [];    // يد الكمبيوتر (سيتم اللعب تلقائيًا)
+    let boardChain = [];      // السلسلة على الطاولة: كل عنصر [a,b]
+    let currentTurn = "player"; // "player" أو "computer"
+    let playerScore = 0;
+    let gameOver = false;
+    let winnerDeclared = false;
+
+    // عناصر DOM
+    const playerHandDiv = document.getElementById("playerHand");
+    const chainContainer = document.getElementById("chainContainer");
+    const playerScoreSpan = document.getElementById("playerScore");
+    const turnIndicatorSpan = document.getElementById("turnIndicator");
+    const winnerMsgDiv = document.getElementById("winnerMessage");
+    const resetBtn = document.getElementById("resetGame");
+
+    // دالة لخلط المصفوفة
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // بدء لعبة جديدة
+    function initGame() {
+        // إعادة تعيين
+        let tilesDeck = shuffleArray([...allTiles]);
+        playerHand = [];
+        computerHand = [];
+        boardChain = [];
+        currentTurn = "player";
+        playerScore = 0;
+        gameOver = false;
+        winnerDeclared = false;
+        winnerMsgDiv.innerHTML = "";
+        winnerMsgDiv.classList.remove("win-animate");
+        playerScoreSpan.innerText = "0";
+        turnIndicatorSpan.innerText = "أنت";
+
+        // توزيع 7 قطع لكل لاعب
+        playerHand = tilesDeck.splice(0, 7);
+        computerHand = tilesDeck.splice(0, 7);
+        
+        // تحديد أول قطعة مناسبة لبدء الطاولة (نختار أعلى قطعة مزدوجة أو أي قطعة)
+        let startTile = null;
+        let allPoss = [...playerHand, ...computerHand];
+        // إيجاد قطعة مزدوجة للبداية مثلاً
+        for (let i = 0; i < allPoss.length; i++) {
+            if (allPoss[i][0] === allPoss[i][1]) {
+                startTile = allPoss[i];
+                break;
+            }
+        }
+        if (!startTile && allPoss.length) startTile = allPoss[0];
+        
+        if (startTile) {
+            // إزالة من اليد التي تنتمي إليها
+            let removed = false;
+            for (let i = 0; i < playerHand.length; i++) {
+                if (playerHand[i] === startTile || (playerHand[i][0]===startTile[0] && playerHand[i][1]===startTile[1])) {
+                    playerHand.splice(i,1);
+                    removed = true;
+                    break;
+                }
+            }
+            if (!removed) {
+                for (let i = 0; i < computerHand.length; i++) {
+                    if (computerHand[i] === startTile || (computerHand[i][0]===startTile[0] && computerHand[i][1]===startTile[1])) {
+                        computerHand.splice(i,1);
+                        break;
+                    }
+                }
+            }
+            boardChain.push([startTile[0], startTile[1]]);
+        } else {
+            // fallback
+            boardChain.push([0,0]);
+        }
+        
+        // تحديث واجهة اللاعب
+        updateUI();
+        // إذا كان الدور كمبيوتر نبدأ بيه
+        if (!gameOver && currentTurn === "computer") {
+            setTimeout(() => computerTurn(), 500);
+        }
+        updateScoreFromHand();
+    }
+
+    // تحديث النقاط بناءً على مجموع قطع اليد المتبقية (كل نقطة = 1 نقطة)
+    function updateScoreFromHand() {
+        let total = 0;
+        for (let tile of playerHand) {
+            total += (tile[0] + tile[1]);
+        }
+        playerScore = total;
+        playerScoreSpan.innerText = playerScore;
+        // إذا انتهت يد اللاعب = فوز
+        if (playerHand.length === 0 && !winnerDeclared && !gameOver) {
+            declareWinner("أنت");
+        }
+        // إذا انتهت يد الكمبيوتر
+        if (computerHand.length === 0 && !winnerDeclared && !gameOver) {
+            declareWinner("الكمبيوتر");
+        }
+    }
+
+    function declareWinner(winnerName) {
+        if (gameOver) return;
+        gameOver = true;
+        winnerDeclared = true;
+        winnerMsgDiv.innerHTML = `🏆 الفائز: ${winnerName} 🏆 🎉🎉🎉`;
+        winnerMsgDiv.classList.add("win-animate");
+        // تشغيل الصوت
+        playWinSound();
+        turnIndicatorSpan.innerText = "انتهت";
+        // تعطيل أي تفاعل
+    }
+
+    // التحقق هل يمكن وضع قطعة على الطاولة من جهة اليمين أو اليسار
+    function canPlace(tile, chain) {
+        if (chain.length === 0) return true;
+        const leftEnd = chain[0][0];
+        const rightEnd = chain[chain.length-1][1];
+        return (tile[0] === leftEnd || tile[1] === leftEnd || tile[0] === rightEnd || tile[1] === rightEnd);
+    }
+
+    // وضع القطعة على السلسلة
+    function placeTile(tile, chain) {
+        if (chain.length === 0) {
+            chain.push(tile);
+            return true;
+        }
+        const leftVal = chain[0][0];
+        const rightVal = chain[chain.length-1][1];
+        
+        if (tile[0] === rightVal || tile[1] === rightVal) {
+            // نضيف على اليمين
+            if (tile[0] === rightVal) chain.push([tile[0], tile[1]]);
+            else chain.push([tile[1], tile[0]]);
+            return true;
+        }
+        else if (tile[0] === leftVal || tile[1] === leftVal) {
+            // نضيف على اليسار
+            if (tile[1] === leftVal) chain.unshift([tile[0], tile[1]]);
+            else chain.unshift([tile[1], tile[0]]);
+            return true;
+        }
+        return false;
+    }
+
+    // اللاعب يحاول لعب قطعة
+    function playerPlayTile(index) {
+        if (gameOver) return;
+        if (currentTurn !== "player") {
+            // تنبيه بسيط
+            return;
+        }
+        const tile = playerHand[index];
+        if (!tile) return;
+        if (canPlace(tile, boardChain)) {
+            // إزالة من يد اللاعب
+            playerHand.splice(index, 1);
+            placeTile(tile, boardChain);
+            updateUI();
+            updateScoreFromHand();
+            // فحص فوز بعد التحديث
+            if (playerHand.length === 0) {
+                declareWinner("أنت");
+                updateUI();
+                return;
+            }
+            // تغيير الدور
+            currentTurn = "computer";
+            turnIndicatorSpan.innerText = "كمبيوتر";
+            updateUI();
+            // دع الكمبيوتر يلعب بعد تأخير
+            setTimeout(() => computerTurn(), 400);
+        } else {
+            // اهتزاز خفيف أو رسالة مؤقتة
+            winnerMsgDiv.innerHTML = "⚠️ لا يمكن وضع هذه القطعة ⚠️";
+            setTimeout(() => { if(!winnerDeclared) winnerMsgDiv.innerHTML = ""; }, 800);
+        }
+    }
+
+    // ذكاء الكمبيوتر: يبحث عن قطعة يمكن وضعها ويلعبها
+    function computerTurn() {
+        if (gameOver) return;
+        if (currentTurn !== "computer") return;
+        let played = false;
+        for (let i = 0; i < computerHand.length; i++) {
+            let tile = computerHand[i];
+            if (canPlace(tile, boardChain)) {
+                computerHand.splice(i, 1);
+                placeTile(tile, boardChain);
+                played = true;
+                updateUI();
+                updateScoreFromHand();
+                if (computerHand.length === 0) {
+                    declareWinner("الكمبيوتر");
+                    updateUI();
+                    return;
+                }
+                break;
+            }
+        }
+        if (!played) {
+            // لو مفيش قطعة مناسبة: الكمبيوتر يمرر لكن في دومينو حقيقي يمر, هنا ننهي اللعبة للمبسطية؟ نعطي فرصة للاعب لكن لو مفيش حركة للكل نعلن نهاية باللاعب صاحب أقل نقاط
+            let playerCanMove = playerHand.some(t => canPlace(t, boardChain));
+            if (!playerCanMove && !played) {
+                // نهاية اللعبة بالمقارنة
+                if (!gameOver) {
+                    let compTotal = computerHand.reduce((s, t) => s + t[0] + t[1], 0);
+                    if (playerScore < compTotal) declareWinner("أنت (نقاط أقل)");
+                    else if (compTotal < playerScore) declareWinner("الكمبيوتر (نقاط أقل)");
+                    else declareWinner("تعادل");
+                }
+                return;
+            }
+            // غير قادر على اللعب، نعطي الدور للاعب
+            currentTurn = "player";
+            turnIndicatorSpan.innerText = "أنت";
+            updateUI();
+            // تنبيه
+            winnerMsgDiv.innerHTML = "💻 الكمبيوتر لم يجد حركة! دورك 💻";
+            setTimeout(() => { if(!winnerDeclared) winnerMsgDiv.innerHTML = ""; }, 1500);
+            return;
+        }
+        // بعد حركة الكمبيوتر نعطي الدور للاعب
+        if (!gameOver) {
+            currentTurn = "player";
+            turnIndicatorSpan.innerText = "أنت";
+            updateUI();
+            // في حالة إذا اللاعب ليس لديه حركات ممكن نختم اللعبة هنا
+            let playerNowCan = playerHand.some(t => canPlace(t, boardChain));
+            if (!playerNowCan && !gameOver) {
+                let compTotal = computerHand.reduce((s, t) => s + t[0] + t[1], 0);
+                if (playerScore < compTotal) declareWinner("أنت");
+                else if (compTotal < playerScore) declareWinner("الكمبيوتر");
+                else declareWinner("تعادل");
+                updateUI();
+            }
+        }
+    }
+
+    // تحديث الواجهة كاملة 
+    function updateUI() {
+        // عرض يد اللاعب
+        playerHandDiv.innerHTML = "";
+        for (let idx in playerHand) {
+            const tile = playerHand[idx];
+            const div = document.createElement("div");
+            div.className = "domino-tile";
+            if (gameOver || currentTurn !== "player") div.classList.add("disabled-tile");
+            div.innerHTML = `
+                <div class="domino-dots">${tile[0]} | ${tile[1]}</div>
+                <div class="domino-value">${tile[0]}-${tile[1]}</div>
+            `;
+            div.onclick = (function(i) { return function() { playerPlayTile(i); }; })(idx);
+            playerHandDiv.appendChild(div);
+        }
+        
+        // عرض السلسلة
+        chainContainer.innerHTML = "";
+        for (let tile of boardChain) {
+            const chainDiv = document.createElement("div");
+            chainDiv.className = "chain-tile";
+            chainDiv.innerHTML = `<div style="font-size:1.3rem;">${tile[0]} | ${tile[1]}</div>`;
+            chainContainer.appendChild(chainDiv);
+        }
+        if (boardChain.length === 0) chainContainer.innerHTML = "<span style='color:white'>⚡ ابدأ بوضع قطعة ⚡</span>";
+        
+        // إضافة تأثير إذا كان الفائز موجود
+        if (winnerDeclared) {
+            turnIndicatorSpan.innerText = "🏁 انتهت";
+        }
+    }
+
+    // ريسيت
+    resetBtn.addEventListener("click", () => {
+        initGame();
+        // إيقاف اي اصوات قديمة (لايوجد)
+    });
+    
+    // بدء اللعبة
+    initGame();
+</script>
+</body>
+</html>
